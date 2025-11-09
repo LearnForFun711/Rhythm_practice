@@ -1,0 +1,843 @@
+<!--
+    HOW TO RUN THIS FILE:
+    No special environment or setup is needed.
+    1. Make sure you have an internet connection.
+    2. Open this file directly in a modern web browser (like Chrome, Firefox, or Edge).
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rhythm Practice - 節奏練習</title>
+    <!-- Use a different CDN (unpkg) which may not be blocked -->
+    <script src="https://unpkg.com/vexflow/build/cjs/vexflow.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5em;
+        }
+
+        h2 {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.5em;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            color: white;
+        }
+
+        .btn-beginner {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        .btn-advanced {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .level-info {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 1.2em;
+            color: #555;
+            font-weight: bold;
+        }
+
+        .notation-container {
+            background: #f9f9f9;
+            border-radius: 10px;
+            padding: 30px;
+            margin-bottom: 30px;
+            min-height: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .instructions {
+            background: #e3f2fd;
+            padding: 20px;
+            border-radius: 8px;
+            border-left: 4px solid #2196F3;
+        }
+
+        .instructions h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+        }
+
+        .instructions p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 5px;
+        }
+
+        #notation svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        .mode-selection {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        .btn-mode {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+        }
+
+        .bpm-control {
+            text-align: center;
+            margin: 20px auto 30px;
+            max-width: 400px;
+            background: #f0f0f0;
+            padding: 15px;
+            border-radius: 10px;
+        }
+
+        .bpm-control label {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        .bpm-control input[type="range"] {
+            width: 250px;
+            vertical-align: middle;
+            cursor: pointer;
+        }
+
+        .bpm-control span {
+            font-weight: bold;
+            font-size: 1.1em;
+            margin-left: 10px;
+            min-width: 40px;
+            display: inline-block;
+            vertical-align: middle;
+            color: #333;
+        }
+
+        .mode-container {
+            margin-bottom: 30px;
+        }
+
+        .mode-container h3 {
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Custom Mode Styles */
+        .rhythm-palette {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            padding: 20px;
+            background: #f0f0f0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .rhythm-block {
+            width: 80px;
+            height: 100px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 10px;
+            transition: all 0.2s ease;
+            user-select: none;
+        }
+
+        .rhythm-block:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .rhythm-block:active {
+            cursor: grabbing;
+        }
+
+        .rhythm-block img { /* Changed from svg to img */
+            width: 60px;
+            height: 60px;
+            object-fit: contain;
+        }
+
+        .rhythm-block .label {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: #666;
+            text-align: center;
+        }
+
+        .workspace {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .measure-container {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .measure-label {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #555;
+            text-align: center;
+        }
+
+        .drop-zone {
+            min-height: 120px;
+            background: #fafafa;
+            border: 3px dashed #999;
+            border-radius: 10px;
+            padding: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .drop-zone.drag-over {
+            background: #e3f2fd;
+            border-color: #2196F3;
+        }
+
+        .beat-counter {
+            margin-top: 10px;
+            text-align: center;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .beat-counter.full {
+            color: #4CAF50;
+        }
+
+        .beat-counter.overflow {
+            color: #f44336;
+        }
+
+        .custom-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .btn-clear {
+            background: linear-gradient(135deg, #f44336, #e91e63);
+        }
+
+        .btn-play, .btn-replay {
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+        }
+
+        /* Random Mode Styles */
+        .random-controls {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .btn-generate {
+            background: linear-gradient(135deg, #FF9800, #F57C00);
+            font-size: 1.2em;
+            padding: 20px 40px;
+        }
+
+        .listen-section {
+            text-align: center;
+            padding: 30px;
+            background: #fff3e0;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .listen-section h3 {
+            color: #E65100;
+            margin-bottom: 20px;
+        }
+
+        .play-controls {
+            margin-bottom: 20px;
+        }
+
+        .btn-play-big {
+            font-size: 1.3em;
+            padding: 20px 50px;
+            background: linear-gradient(135deg, #2196F3, #1976D2);
+        }
+
+        .play-status {
+            margin-top: 15px;
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #1976D2;
+            min-height: 30px;
+        }
+
+        .btn-reveal {
+            background: linear-gradient(135deg, #9C27B0, #7B1FA2);
+            font-size: 1.1em;
+            padding: 15px 40px;
+        }
+
+        .btn-reveal:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        #replay-section {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .dropped-block {
+            width: 70px;
+            height: 90px;
+            background: white;
+            border: 2px solid #333;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 8px;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .dropped-block:hover {
+            background: #ffe0e0;
+        }
+
+        .dropped-block img { /* Changed from svg to img */
+            width: 55px;
+            height: 55px;
+            object-fit: contain;
+        }
+
+        .remove-btn {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            width: 20px;
+            height: 20px;
+            background: #f44336;
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+
+        .dropped-block:hover .remove-btn {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Rhythm Practice Generator</h1>
+        <h2>節奏練習生成器</h2>
+        
+        <div class="controls">
+            <button onclick="selectLevel('grade3')" class="btn btn-advanced">Grade 3 - 三年級 (Advanced)</button>
+            <button onclick="selectLevel('grade6')" class="btn btn-beginner">Grade 6 - 六年級 (Beginner)</button>
+        </div>
+
+        <div id="level-info" class="level-info"></div>
+
+        <div id="mode-selection" class="mode-selection" style="display: none;">
+            <button onclick="selectMode('custom')" class="btn btn-mode">Custom Mode 自訂模式</button>
+            <button onclick="selectMode('random')" class="btn btn-mode">Random Generate Mode 隨機生成模式</button>
+        </div>
+
+        <div id="bpm-control" class="bpm-control" style="display: none;">
+            <label for="bpm">BPM: </label>
+            <input type="range" id="bpm" name="bpm" min="40" max="200" value="120">
+            <span id="bpm-value">120</span>
+        </div>
+
+        <!-- Custom Mode -->
+        <div id="custom-mode" class="mode-container" style="display: none;">
+            <h3>Drag rhythm blocks to create your pattern (2 measures):</h3>
+            <div id="rhythm-palette" class="rhythm-palette"></div>
+            <div class="workspace">
+                <div class="measure-container">
+                    <div class="measure-label">Measure 1</div>
+                    <div id="measure1" class="drop-zone" data-measure="1"></div>
+                    <div class="beat-counter">Beats: <span id="beats1">0/4</span></div>
+                </div>
+                <div class="measure-container">
+                    <div class="measure-label">Measure 2</div>
+                    <div id="measure2" class="drop-zone" data-measure="2"></div>
+                    <div class="beat-counter">Beats: <span id="beats2">0/4</span></div>
+                </div>
+            </div>
+            <div class="custom-controls">
+                <button onclick="clearWorkspace()" class="btn btn-clear">Clear 清除</button>
+                <button onclick="playCustomRhythm()" class="btn btn-play">Play 播放</button>
+            </div>
+        </div>
+
+        <!-- Random Mode -->
+        <div id="random-mode" class="mode-container" style="display: none;">
+            <div class="random-controls">
+                <button onclick="generateRandomRhythm()" class="btn btn-generate">Generate New Rhythm 生成新節奏</button>
+            </div>
+            <div id="listen-section" class="listen-section" style="display: none;">
+                <h3>Listen and clap along! 聽並跟著拍打！</h3>
+                <div class="play-controls">
+                    <button onclick="playRhythm()" class="btn btn-play-big">▶ Play (Listen 2x) 播放</button>
+                    <div id="play-status" class="play-status"></div>
+                </div>
+                <button onclick="revealRhythm()" class="btn btn-reveal" id="reveal-btn" disabled>Show Rhythm 顯示節奏</button>
+            </div>
+            <div id="notation" class="notation-container" style="display: none;"></div>
+            <div id="replay-section" style="display: none;">
+                <button onclick="replayRhythm()" class="btn btn-replay">🔄 Replay 重播</button>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3>Instructions 說明:</h3>
+            <p><strong>Custom Mode:</strong> Drag rhythm blocks into the measures to create your own 2-measure pattern. Click Play to hear it.</p>
+            <p><strong>Random Mode:</strong> Generate a random rhythm, listen twice while clapping along, then reveal to check your accuracy.</p>
+            <p><strong>自訂模式：</strong>將節奏方塊拖入小節中創建你自己的2小節模式。點擊播放來聆聽。</p>
+            <p><strong>隨機模式：</strong>生成隨機節奏，聆聽兩次並跟著拍打，然後顯示以檢查準確度。</p>
+        </div>
+    </div>
+
+    <script>
+        const { Vex } = VexFlow;
+
+        let currentLevel = null;
+        let currentMode = null;
+        let currentRhythm = null;
+        let audioContext = null;
+        let playCount = 0;
+
+        // Grade 3 (Advanced) - Pitter Patter / 採茶曲
+        const grade3Rhythms = [
+            { notes: ['h'], duration: 8, name: 'Half Note', image: 'HalfNote.png' },
+            { notes: ['qd'], duration: 6, name: 'Dotted Quarter Note', image: 'DottedQuarterEighth.png' },
+            { notes: ['8'], duration: 2, name: 'Eighth Note', image: 'EighthNote.png' },
+            { notes: ['q'], duration: 4, name: 'Quarter Note', image: 'QuarterNote.png' }
+        ];
+
+        // Grade 6 (Beginner) - Lesson 1-3
+        const grade6Rhythms = [
+            { notes: ['8', '8'], duration: 4, name: 'Two Eighth Notes', image: 'TwoEighthNotes.png' },
+            { notes: ['8d', '16'], duration: 4, name: 'Dotted Eighth & Sixteenth', image: 'DottedEighthNoteandSixteenthNote.png' },
+            { notes: ['8', '16', '16'], duration: 4, name: 'Eighth & Two Sixteenths', image: 'OneEighthNoteandTwoSixteenthNotes.png' },
+            { notes: ['16', '16', '16', '16'], duration: 4, name: 'Four Sixteenth Notes', image: 'FourSixteenthNotes.png' },
+            { notes: ['q'], duration: 4, name: 'Quarter Note', image: 'QuarterNote.png' }
+        ];
+
+        function selectLevel(level) {
+            currentLevel = level;
+            const levelInfo = document.getElementById('level-info');
+            const modeSelection = document.getElementById('mode-selection');
+            
+            if (level === 'grade3') {
+                levelInfo.textContent = 'Grade 3 - 三年級 (Advanced: Pitter Patter / 採茶曲)';
+                levelInfo.style.color = '#ff6b6b';
+            } else {
+                levelInfo.textContent = 'Grade 6 - 六年級 (Beginner: Lesson 1-3)';
+                levelInfo.style.color = '#4CAF50';
+            }
+            
+            modeSelection.style.display = 'flex';
+            document.getElementById('bpm-control').style.display = 'block';
+            document.getElementById('custom-mode').style.display = 'none';
+            document.getElementById('random-mode').style.display = 'none';
+        }
+
+        function selectMode(mode) {
+            currentMode = mode;
+            document.getElementById('custom-mode').style.display = mode === 'custom' ? 'block' : 'none';
+            document.getElementById('random-mode').style.display = mode === 'random' ? 'block' : 'none';
+            
+            if (mode === 'custom') {
+                initCustomMode();
+            } else {
+                initRandomMode();
+            }
+        }
+
+        function initCustomMode() {
+            const palette = document.getElementById('rhythm-palette');
+            palette.innerHTML = '';
+            
+            const rhythms = currentLevel === 'grade3' ? grade3Rhythms : grade6Rhythms;
+            
+            rhythms.forEach((rhythm, index) => {
+                const block = document.createElement('div');
+                block.className = 'rhythm-block';
+                block.draggable = true;
+                block.dataset.rhythmIndex = index;
+                block.innerHTML = `<img src="MusicNotePhoto/${rhythm.image}" alt="${rhythm.name}"><div class="label">${rhythm.name}</div>`;
+                
+                block.addEventListener('dragstart', handleDragStart);
+                palette.appendChild(block);
+            });
+            
+            setupDropZones();
+        }
+
+        function handleDragStart(e) {
+            const block = e.currentTarget; // Use currentTarget instead of target
+            e.dataTransfer.setData('rhythmIndex', block.dataset.rhythmIndex);
+        }
+
+        function setupDropZones() {
+            ['measure1', 'measure2'].forEach(id => {
+                const zone = document.getElementById(id);
+                zone.innerHTML = '';
+                
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drag-over');
+                });
+                
+                zone.addEventListener('dragleave', (e) => {
+                    // Only remove class if leaving the zone itself, not child elements
+                    if (e.currentTarget === zone) {
+                        zone.classList.remove('drag-over');
+                    }
+                });
+                
+                zone.addEventListener('drop', handleDrop);
+            });
+            
+            // Update beat counters to show 0/4
+            updateBeatCounter('1');
+            updateBeatCounter('2');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            const zone = e.currentTarget;
+            zone.classList.remove('drag-over');
+            
+            const rhythmIndex = parseInt(e.dataTransfer.getData('rhythmIndex'));
+            if (isNaN(rhythmIndex)) return; // Safety check
+            
+            const rhythms = currentLevel === 'grade3' ? grade3Rhythms : grade6Rhythms;
+            const rhythm = rhythms[rhythmIndex];
+            
+            const measureNum = zone.dataset.measure;
+            const currentBeats = calculateBeats(zone);
+            
+            if (currentBeats + rhythm.duration / 4 <= 4) {
+                addBlockToMeasure(zone, rhythm, rhythmIndex);
+                updateBeatCounter(measureNum);
+            } else {
+                alert('Not enough space in this measure! Current: ' + currentBeats + ' beats, trying to add: ' + (rhythm.duration / 4) + ' beats');
+            }
+        }
+
+        function addBlockToMeasure(zone, rhythm, rhythmIndex) {
+            const block = document.createElement('div');
+            block.className = 'dropped-block';
+            block.dataset.rhythmIndex = rhythmIndex;
+            block.innerHTML = `<img src="MusicNotePhoto/${rhythm.image}" alt="${rhythm.name}"><button class="remove-btn" onclick="removeBlock(this)">×</button>`;
+            zone.appendChild(block);
+        }
+
+        function removeBlock(btn) {
+            const block = btn.parentElement;
+            const zone = block.parentElement;
+            const measureNum = zone.dataset.measure;
+            block.remove();
+            updateBeatCounter(measureNum);
+        }
+
+        function calculateBeats(zone) {
+            const rhythms = currentLevel === 'grade3' ? grade3Rhythms : grade6Rhythms;
+            let total = 0;
+            zone.querySelectorAll('.dropped-block').forEach(block => {
+                const rhythm = rhythms[block.dataset.rhythmIndex];
+                total += rhythm.duration / 4;
+            });
+            return total;
+        }
+
+        function updateBeatCounter(measureNum) {
+            const zone = document.getElementById('measure' + measureNum);
+            const counter = document.getElementById('beats' + measureNum);
+            const beats = calculateBeats(zone);
+            counter.textContent = `${beats}/4`;
+            counter.parentElement.className = 'beat-counter' + (beats === 4 ? ' full' : beats > 4 ? ' overflow' : '');
+        }
+
+        function clearWorkspace() {
+            ['measure1', 'measure2'].forEach(id => {
+                document.getElementById(id).innerHTML = '';
+                updateBeatCounter(id.slice(-1));
+            });
+        }
+
+        function playCustomRhythm() {
+            const measure1 = collectMeasureNotes('measure1');
+            const measure2 = collectMeasureNotes('measure2');
+            
+            if (measure1.length === 0 && measure2.length === 0) {
+                alert('Please add some rhythm blocks first!');
+                return;
+            }
+            
+            playRhythmSequence([...measure1, ...measure2]);
+        }
+
+        function collectMeasureNotes(measureId) {
+            const zone = document.getElementById(measureId);
+            const rhythms = currentLevel === 'grade3' ? grade3Rhythms : grade6Rhythms;
+            const notes = [];
+            
+            zone.querySelectorAll('.dropped-block').forEach(block => {
+                const rhythm = rhythms[block.dataset.rhythmIndex];
+                notes.push(...rhythm.notes);
+            });
+            
+            return notes;
+        }
+
+        function initRandomMode() {
+            document.getElementById('listen-section').style.display = 'none';
+            document.getElementById('notation').style.display = 'none';
+            document.getElementById('replay-section').style.display = 'none';
+        }
+
+        function generateRandomRhythm() {
+            const rhythms = currentLevel === 'grade3' ? grade3Rhythms : grade6Rhythms;
+            const measure1 = generateMeasure(rhythms);
+            const measure2 = generateMeasure(rhythms);
+            
+            currentRhythm = [...measure1, ...measure2];
+            playCount = 0;
+            
+            document.getElementById('listen-section').style.display = 'block';
+            document.getElementById('notation').style.display = 'none';
+            document.getElementById('replay-section').style.display = 'none';
+            document.getElementById('reveal-btn').disabled = true;
+            document.getElementById('play-status').textContent = '';
+        }
+
+        function generateMeasure(rhythmPatterns) {
+            const measure = [];
+            let currentDuration = 0;
+            const maxDuration = 16;
+            
+            while (currentDuration < maxDuration) {
+                const availableRhythms = rhythmPatterns.filter(r => 
+                    currentDuration + r.duration <= maxDuration
+                );
+                
+                if (availableRhythms.length === 0) break;
+                
+                const rhythm = availableRhythms[Math.floor(Math.random() * availableRhythms.length)];
+                measure.push(...rhythm.notes);
+                currentDuration += rhythm.duration;
+            }
+            
+            return measure;
+        }
+
+        function playRhythm() {
+            playCount++;
+            const status = document.getElementById('play-status');
+            status.textContent = `Playing... (${playCount}/2)`;
+            
+            playRhythmSequence(currentRhythm, () => {
+                if (playCount >= 2) {
+                    status.textContent = 'Finished! Click "Show Rhythm" when ready.';
+                    document.getElementById('reveal-btn').disabled = false;
+                } else {
+                    status.textContent = `Played ${playCount}/2 times. Click Play again or Show Rhythm.`;
+                    document.getElementById('reveal-btn').disabled = false;
+                }
+            });
+        }
+
+        function revealRhythm() {
+            renderNotation(currentRhythm);
+            document.getElementById('notation').style.display = 'flex';
+            document.getElementById('replay-section').style.display = 'block';
+        }
+
+        function replayRhythm() {
+            playRhythmSequence(currentRhythm);
+        }
+
+        function playRhythmSequence(notes, callback) {
+            if (!audioContext) {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            
+            const tempo = document.getElementById('bpm').value; // Get BPM from slider
+            const beatDuration = 60 / tempo;
+            let currentTime = audioContext.currentTime;
+            
+            notes.forEach(note => {
+                const duration = getNoteDuration(note, beatDuration);
+                playClick(currentTime);
+                currentTime += duration;
+            });
+            
+            if (callback) {
+                setTimeout(callback, (currentTime - audioContext.currentTime) * 1000);
+            }
+        }
+
+        function getNoteDuration(note, beatDuration) {
+            const durations = {
+                'q': beatDuration,
+                'qd': beatDuration * 1.5,
+                'h': beatDuration * 2,
+                'w': beatDuration * 4,
+                '8': beatDuration * 0.5,
+                '8d': beatDuration * 0.75,
+                '16': beatDuration * 0.25,
+            };
+            return durations[note] || beatDuration;
+        }
+
+        function playClick(time) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 800;
+            gainNode.gain.setValueAtTime(0.3, time);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, time + 0.1);
+            
+            oscillator.start(time);
+            oscillator.stop(time + 0.1);
+        }
+
+        function renderNotation(notes) {
+            const container = document.getElementById('notation');
+            container.innerHTML = '';
+            
+            const vf = new Vex.Flow.Factory({
+                renderer: { elementId: 'notation', width: 900, height: 200 }
+            });
+            
+            const score = vf.EasyScore();
+            const system = vf.System();
+            
+            let notesForMeasure1 = [];
+            let duration1 = 0;
+            let i = 0;
+            for(i = 0; i < notes.length; i++) {
+                const noteDuration = { 'q': 4, 'qd': 6, 'h': 8, 'w': 16, '8': 2, '8d': 3, '16': 1 }[notes[i]];
+                if (duration1 + noteDuration > 16) break;
+                duration1 += noteDuration;
+                notesForMeasure1.push(notes[i]);
+            }
+            const notesForMeasure2 = notes.slice(i);
+
+            [notesForMeasure1, notesForMeasure2].forEach(measure => {
+                if (measure.length === 0) return;
+                const noteString = measure.map(n => {
+                    const noteMap = {
+                        'q': 'B4/q',
+                        'h': 'B4/h',
+                        'w': 'B4/w',
+                        '8': 'B4/8',
+                        'qd': 'B4/qd',
+                        '8d': 'B4/8d',
+                        '16': 'B4/16',
+                    };
+                    return noteMap[n] || 'B4/q';
+                }).join(', ');
+                
+                system.addStave({
+                    voices: [score.voice(score.notes(noteString))]
+                }).addClef('percussion').addTimeSignature('4/4');
+            });
+            
+            vf.draw();
+        }
+
+        // Set initial text on page load
+        const levelInfo = document.getElementById('level-info');
+        levelInfo.textContent = 'Select a grade level to begin - 選擇年級開始練習';
+        levelInfo.style.color = '#999';
+
+        // BPM Slider functionality
+        const bpmSlider = document.getElementById('bpm');
+        const bpmValueSpan = document.getElementById('bpm-value');
+        bpmSlider.addEventListener('input', () => {
+            bpmValueSpan.textContent = bpmSlider.value;
+        });
+    </script>
+</body>
+</html>
